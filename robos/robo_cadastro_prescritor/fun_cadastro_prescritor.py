@@ -4,6 +4,8 @@ import pyodbc
 import requests
 from datetime import datetime
 
+from dotenv import load_dotenv
+
 
 def get_logger(nome_robo: str):
     log_dir = os.path.join("logs", f"logs_{nome_robo}")
@@ -32,17 +34,14 @@ def get_logger(nome_robo: str):
 
 
 log = get_logger("cadastro_de_prescritor")
-
-
+load_dotenv()
 central_db_config = {
     "server": os.getenv("CENTRAL_DB_SERVER"),
     "database": os.getenv("CENTRAL_DB_DATABASE"),
     "username": os.getenv("CENTRAL_DB_USER"),
     "password": os.getenv("CENTRAL_DB_PASS")
 }
-
 def conectar_central():
-    """Estabelece conexão com o banco de dados central e retorna a conexão."""
     try:
         conn = pyodbc.connect(
             f"DRIVER={{SQL Server}};"
@@ -52,7 +51,6 @@ def conectar_central():
             f"PWD={central_db_config['password']}"
         )
         return conn
-
     except Exception as e:
         log(f"Erro ao conectar ao banco central: {e}")
         return None

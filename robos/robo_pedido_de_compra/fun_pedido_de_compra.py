@@ -797,6 +797,13 @@ log = get_logger("pedidos_de_compra")
 load_dotenv()
 
 
+central_db_config = {
+    "server": os.getenv("CENTRAL_DB_SERVER"),
+    "database": os.getenv("CENTRAL_DB_DATABASE"),
+    "username": os.getenv("CENTRAL_DB_USER"),
+    "password": os.getenv("CENTRAL_DB_PASS")
+}
+
 awayson_db_config = {
     "server": os.getenv("AWAYSON_DB_SERVER"),
     "database": os.getenv("AWAYSON_DB_DATABASE"),
@@ -804,12 +811,6 @@ awayson_db_config = {
     "password": os.getenv("AWAYSON_DB_PASS")
 }
 
-central_db_config = {
-    "server": os.getenv("CENTRAL_DB_SERVER"),
-    "database": os.getenv("CENTRAL_DB_DATABASE"),
-    "username": os.getenv("CENTRAL_DB_USER"),
-    "password": os.getenv("CENTRAL_DB_PASS")
-}
 
 def obter_ip_filial(filial):
     if 1 <= filial <= 200 or filial == 241:

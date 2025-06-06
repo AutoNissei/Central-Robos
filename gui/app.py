@@ -5,6 +5,7 @@ from robos.robo_pedido_de_compra.pedido_de_compra import run as run_pedido_compr
 from robos.robo_chave_nao_existente.chave_nao_existente import run as run_chave_nao_existente
 from robos.robo_exclusao_protocolo.exclusao_protocolo import run as run_exclusao_protocolo
 from robos.robo_cadastro_prescritor.cadastro_prescritor import run as run_cadastro_prescritor
+from robos.robo_produto_reserva.produto_reserva import run as run_produto_reserva
 
 
 class App(ctk.CTk):
@@ -47,6 +48,13 @@ class App(ctk.CTk):
                 "botao_var": "botao_cadastro_prescritor",
                 "label_var": "label_status_cadastro_prescritor",
                 "callback": self.iniciar_cadastro_prescritor
+            },
+            {
+                "titulo": "Robô: Produto em Reserva",
+                "status_var": "status_produto_reserva",
+                "botao_var": "botao_produto_reserva",
+                "label_var": "label_status_produto_reserva",
+                "callback": self.iniciar_produto_reserva
             }
         ]
 
@@ -132,6 +140,23 @@ class App(ctk.CTk):
             finally:
                 self.botao_cadastro_prescritor.configure(state="normal")
                 self.label_status_cadastro_prescritor.configure(text="✅ Robô finalizado!")
+
+        threading.Thread(target=tarefa).start()
+
+
+    def iniciar_produto_reserva(self):
+        self.botao_produto_reserva.configure(state="disabled")
+        self.label_status_produto_reserva.configure(text="Rodando...", compound="left")
+
+        status = self.status_produto_reserva.get()
+        ativo = "000001" if status == "Aguardando atendimento" else "000006"
+
+        def tarefa():
+            try:
+                run_produto_reserva(ativo)
+            finally:
+                self.botao_produto_reserva.configure(state="normal")
+                self.label_status_produto_reserva.configure(text="✅ Robô finalizado!")
 
         threading.Thread(target=tarefa).start()
 

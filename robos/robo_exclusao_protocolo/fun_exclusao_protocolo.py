@@ -105,29 +105,33 @@ def ler_arquivo(nome_arquivo):
     return []
 
 def excluir_protocolo_central(chaves):
-
     protocolos_nao_encontrados_central = []
     try:
         conn = conectar_central()
         if conn is None:
             return []
-        cursor = conn.cursor()
-        for chave in chaves:
 
-            cursor.execute("SELECT PROTOCOLO_NAO_RECEBIMENTO_NF, CHAVE_NFE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF WHERE CHAVE_NFE = ?", chave)
+        cursor = conn.cursor()
+
+        for chave in chaves:
+            cursor.execute("""
+                SELECT PROTOCOLO_NAO_RECEBIMENTO_NF 
+                FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF 
+                WHERE CHAVE_NFE = ?
+            """, chave)
             resultado = cursor.fetchone()
 
             if resultado:
-                protocolo_nao_recebimento, chave_nfe = resultado #empacotamento dos resultados
                 try:
-                    cursor.execute("DELETE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF WHERE CHAVE_NFE = ?", chave) ##utilizar a var protocolo_nao_recebimento
+                    cursor.execute("""
+                        DELETE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF 
+                        WHERE CHAVE_NFE = ?
+                    """, chave)
                     conn.commit()
                 except Exception as e:
-                    log(f"Erro ao excluir o protocolo da central: {e}")
+                    log(f"Erro ao excluir o protocolo da central para a chave {chave}: {e}")
             else:
                 protocolos_nao_encontrados_central.append(chave)
-            cursor.close()
-            conn.close()
 
         return protocolos_nao_encontrados_central
 
@@ -135,39 +139,61 @@ def excluir_protocolo_central(chaves):
         log(f"Erro ao realizar o processo de exclusão da central: {e}")
         return []
 
+    finally:
+        try:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+        except:
+            pass
+
 
 def excluir_protocolo_filial(chaves, num_filial, protocolos_nao_encontrados_central):
     protocolos_nao_encontrados = []
+
     try:
         conn_filial = conectar_filial(num_filial)
         if conn_filial is None:
-            return
+            return []
 
         cursor = conn_filial.cursor()
 
         for chave in chaves:
-
-            cursor.execute(
-                "SELECT PROTOCOLO_NAO_RECEBIMENTO_NF, CHAVE_NFE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF WHERE CHAVE_NFE = ?",
-                chave)
+            cursor.execute("""
+                SELECT PROTOCOLO_NAO_RECEBIMENTO_NF 
+                FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF 
+                WHERE CHAVE_NFE = ?
+            """, chave)
             resultado = cursor.fetchone()
 
             if resultado:
-                protocolo_nao_recebimento, chave = resultado
                 try:
-                    cursor.execute("DELETE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF WHERE CHAVE_NFE = ?", chave)  ##utilizar a var protocolo_nao_recebimento
+                    cursor.execute("""
+                        DELETE FROM PROTOCOLOS_NAO_RECEBIMENTOS_NF 
+                        WHERE CHAVE_NFE = ?
+                    """, chave)
                     conn_filial.commit()
                 except Exception as e:
-                    log(f"Erro ao excluir o protocolo da filial: {e}")
+                    log(f"Erro ao excluir o protocolo da filial para a chave {chave}: {e}")
             else:
                 if chave in protocolos_nao_encontrados_central:
-                     protocolos_nao_encontrados.append(chave)
-            cursor.close()
-            conn_filial.close()
+                    protocolos_nao_encontrados.append(chave)
 
         return protocolos_nao_encontrados
+
     except Exception as e:
         log(f"Erro ao consultar notas na filial: {e}")
+        return []
+
+    finally:
+        try:
+            if cursor:
+                cursor.close()
+            if conn_filial:
+                conn_filial.close()
+        except:
+            pass
 
 
 
