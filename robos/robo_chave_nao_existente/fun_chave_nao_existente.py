@@ -74,9 +74,9 @@ def obter_ip_filial(filial):
 
     filial_db_config = {
         "server": ip,
-        "database": "PBS_LOCAL_DADOS",
-        "username": "SA",
-        "password": "ERPM@2017"
+        "database": os.getenv("FILIAL_DB_DATABASE"),
+        "username": os.getenv("FILIAL_DB_USER"),
+        "password": os.getenv("FILIAL_DB_PASS")
     }
 
     return filial_db_config
